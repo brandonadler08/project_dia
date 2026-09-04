@@ -11,10 +11,13 @@ export default defineConfig({
     },
   },
   server: {
+    port: 5173,
+    host: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: process.env.VITE_PROXY_TARGET || 'https://project-dia.onrender.com',
         changeOrigin: true,
+        secure: false,
       },
     },
   },

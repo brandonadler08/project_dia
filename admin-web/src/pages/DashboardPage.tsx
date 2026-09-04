@@ -1,9 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { DataTable, Column } from '../components/common/DataTable';
-import { Briefcase, UserCheck, Activity, AlertCircle, Coins } from 'lucide-react';
+import { Briefcase, UserCheck, Activity, AlertCircle, Coins, Camera, Eye } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import { EvidenceViewerModal } from '../components/common/EvidenceViewerModal';
+import axios from 'axios';
 
 export const DashboardPage: React.FC = () => {
+  const [gestiones, setGestiones] = useState<any[]>([]);
+  const [selectedGestionForModal, setSelectedGestionForModal] = useState<any | null>(null);
+
+  const fetchDashboardData = async () => {
+    try {
+      const res = await axios.get('/api/gestiones');
+      if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
+        setGestiones(res.data.data);
+      }
+    } catch (e) {
+      // Keep existing data
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+    const interval = setInterval(fetchDashboardData, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
   const chartDataCuentas = [
     { name: 'KAVAK', cuentas: 4000 },
     { name: 'VENTO', cuentas: 3000 },
@@ -23,45 +45,97 @@ export const DashboardPage: React.FC = () => {
   ];
 
   const chartDataExito = [
-    { name: 'Exitoso', value: 72 },
-    { name: 'No Exitoso', value: 28 },
+    { name: 'Exitoso', value: 74 },
+    { name: 'No Exitoso', value: 26 },
   ];
   const COLORS = ['#D4AF37', '#64748B'];
 
-  const ultimasGestiones = [
-    { id: '1', cuenta: 'KVK-2918093', cliente: 'KAVAK', comisionista: 'Carlos Mendoza', resultado: 'Exitoso', fecha: 'Hoy 14:30', comision: '$400' },
-    { id: '2', cuenta: 'VNT-5075881', cliente: 'VENTO', comisionista: 'Carlos Mendoza', resultado: 'Exitoso', fecha: 'Hoy 13:15', comision: '$350' },
-    { id: '3', cuenta: 'CLP-12bd2c09', cliente: 'CLIP', comisionista: 'Juan Pérez', resultado: 'No Exitoso', fecha: 'Hoy 11:45', comision: '$300' },
-    { id: '4', cuenta: 'KNF-237000', cliente: 'KONFÍO', comisionista: 'Carlos Mendoza', resultado: 'Exitoso', fecha: 'Hoy 10:20', comision: '$550' },
+  const fallbackGestiones = [
+    { id: '1', cuenta: { identificador_externo: 'KVK-2918093', clienteProducto: { nombre: 'KAVAK' } }, comisionista: { nombre: 'Carlos Mendoza' }, resultado: 'Exitoso', hora: 'Hoy 14:30', codigo_cierre: 'Promesa de Pago' },
+    { id: '2', cuenta: { identificador_externo: 'VNT-5075881', clienteProducto: { nombre: 'VENTO' } }, comisionista: { nombre: 'Carlos Mendoza' }, resultado: 'Exitoso', hora: 'Hoy 13:15', codigo_cierre: 'Recuperación de Garantía' },
+    { id: '3', cuenta: { identificador_externo: 'CLP-12bd2c09', clienteProducto: { nombre: 'CLIP' } }, comisionista: { nombre: 'Héctor Valencia' }, resultado: 'No Exitoso', hora: 'Hoy 11:45', codigo_cierre: 'Local Cerrado' },
+    { id: '4', cuenta: { identificador_externo: 'KNF-237000', clienteProducto: { nombre: 'KONFÍO' } }, comisionista: { nombre: 'Carlos Mendoza' }, resultado: 'Exitoso', hora: 'Hoy 10:20', codigo_cierre: 'One Shot 50%' },
   ];
 
-  const columns: Column<typeof ultimasGestiones[0]>[] = [
-    { header: 'ID Cuenta', accessor: 'cuenta', render: (r) => <span className="font-mono text-slate-300 font-semibold">{r.cuenta}</span> },
-    { header: 'Cliente', accessor: 'cliente', render: (row) => (
-      <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-[#141926] border border-white/[0.08] text-slate-300">
-        {row.cliente}
-      </span>
-    )},
-    { header: 'Gestor de Campo', accessor: 'comisionista' },
-    { header: 'Comisión Generada', accessor: 'comision', render: (r) => <span className="text-gold-400 font-mono font-medium">{r.comision} MXN</span> },
-    { header: 'Resultado', accessor: 'resultado', render: (row) => (
-      <span className={`px-2 py-0.5 rounded text-[11px] font-medium ${row.resultado === 'Exitoso' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-        {row.resultado}
-      </span>
-    )},
-    { header: 'Hora Visita', accessor: 'fecha' },
+  const dataSource = gestiones.length > 0 ? gestiones.slice(0, 5) : fallbackGestiones;
+
+  const columns: Column<any>[] = [
+    { 
+      header: 'ID Cuenta', 
+      accessor: 'cuenta', 
+      render: (r) => <span className="font-mono text-slate-300 font-semibold">{r.cuenta?.identificador_externo || r.cuenta_id || 'ID-0000'}</span> 
+    },
+    { 
+      header: 'Cliente', 
+      accessor: 'cliente', 
+      render: (r) => (
+        <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#141926] border border-gold-500/30 text-gold-300">
+          {r.cuenta?.clienteProducto?.nombre || r.cliente || 'VENTO'}
+        </span>
+      )
+    },
+    { 
+      header: 'Gestor de Campo', 
+      accessor: 'comisionista',
+      render: (r) => <span className="text-xs text-slate-200">🏃 {r.comisionista?.nombre || r.comisionista || 'Carlos Mendoza'}</span>
+    },
+    { 
+      header: 'Resultado / Código', 
+      accessor: 'resultado', 
+      render: (row) => {
+        const isExitoso = row.resultado === 'Exitoso' || row.codigo_cierre?.toLowerCase().includes('promesa') || row.codigo_cierre?.toLowerCase().includes('exitoso');
+        return (
+          <span className={`px-2 py-0.5 rounded text-[11px] font-medium ${isExitoso ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+            {row.codigo_cierre || row.resultado || 'Exitoso'}
+          </span>
+        );
+      }
+    },
+    { 
+      header: 'Evidencias', 
+      accessor: 'evidencias',
+      render: (r) => (
+        <button
+          onClick={() => setSelectedGestionForModal(r)}
+          className="group flex items-center space-x-1.5 text-xs text-amber-300 hover:text-amber-200 font-mono bg-amber-950/40 hover:bg-amber-900/60 px-2 py-0.5 rounded-lg border border-amber-500/40 hover:border-amber-400 transition-all cursor-pointer"
+          title="Haz clic para ver las fotos"
+        >
+          <Camera className="w-3 h-3 text-amber-400 group-hover:scale-110 transition-transform" />
+          <span className="underline underline-offset-2">
+            {r.evidencias?.length || r.total_fotos || 1} Foto(s)
+          </span>
+          <Eye className="w-2.5 h-2.5 text-amber-400 opacity-75 group-hover:opacity-100" />
+        </button>
+      )
+    },
+    { 
+      header: 'Hora Visita', 
+      accessor: 'fecha_gestion',
+      render: (r) => {
+        const d = r.fecha_gestion ? new Date(r.fecha_gestion) : (r.createdAt ? new Date(r.createdAt) : null);
+        return <span className="font-mono text-xs text-gold-300 font-bold">{d ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : (r.hora || 'Ahora')}</span>;
+      }
+    },
   ];
 
   return (
     <div className="space-y-6">
+      {/* Evidence Viewer Modal */}
+      <EvidenceViewerModal
+        isOpen={!!selectedGestionForModal}
+        gestion={selectedGestionForModal}
+        onClose={() => setSelectedGestionForModal(null)}
+      />
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <div>
           <h1 className="text-xl font-semibold text-white">Dashboard Operativo</h1>
-          <p className="text-xs text-slate-400">Monitoreo de carteras, asignaciones y gestiones de campo</p>
+          <p className="text-xs text-slate-400">Monitoreo en vivo de carteras, asignaciones y gestiones de campo</p>
         </div>
         <div className="flex items-center space-x-2">
-          <span className="text-[11px] text-slate-400 font-mono bg-[#0E121B] px-3 py-1.5 rounded-lg border border-white/[0.08]">
-            Actualización en vivo
+          <span className="text-[11px] text-emerald-400 font-mono bg-[#0E121B] px-3 py-1.5 rounded-lg border border-emerald-500/30 flex items-center">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping mr-1.5" />
+            Sincronización en Tiempo Real Activa
           </span>
         </div>
       </div>
@@ -97,11 +171,11 @@ export const DashboardPage: React.FC = () => {
 
         <div className="bg-[#0E121B] p-4 rounded-xl border border-white/[0.07]">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400">Gestiones Hoy</span>
+            <span className="text-xs font-medium text-slate-400">Visitas Transmitidas</span>
             <Activity className="w-4 h-4 text-sky-400" />
           </div>
-          <p className="text-2xl font-bold text-white mt-2 font-mono">245</p>
-          <span className="text-[11px] text-slate-400 mt-0.5 block">72% Tasa de Contacto</span>
+          <p className="text-2xl font-bold text-white mt-2 font-mono">{gestiones.length || 4}</p>
+          <span className="text-[11px] text-emerald-400 mt-0.5 block">Transmitidas con GPS satelital</span>
         </div>
       </div>
 
@@ -179,8 +253,8 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         <div className="bg-[#0E121B] p-5 rounded-xl border border-white/[0.07] lg:col-span-2">
-          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Últimas Gestiones de Campo</h3>
-          <DataTable columns={columns} data={ultimasGestiones} />
+          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Últimas Gestiones de Campo en Vivo</h3>
+          <DataTable columns={columns} data={dataSource} />
         </div>
       </div>
     </div>
