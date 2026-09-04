@@ -1,15 +1,14 @@
 import { Platform } from 'react-native';
 
-// Cambia esta URL por la URL de tu servidor en Render cuando esté desplegado
-// Ejemplo: 'https://ead-bpo-backend.onrender.com/api'
-export const RENDER_PRODUCTION_URL = 'https://ead-bpo-backend.onrender.com/api';
+// Servidor de Producción en Vivo en Render
+export const RENDER_PRODUCTION_URL = 'https://project-dia.onrender.com/api';
 
-// Configuración de desarrollo local (por IP en la misma red Wi-Fi)
+// Configuración de desarrollo local
 const DEV_IP = '192.168.100.156';
 const DEV_URL = `http://${DEV_IP}:3000/api`;
 
-// Si estás en producción usa RENDER_PRODUCTION_URL, si estás en local usa DEV_URL
-export const IS_PRODUCTION = false; // Cambiar a true al desplegar en Render
+// En producción para que el APK siempre se conecte a la nube
+export const IS_PRODUCTION = true;
 
 export const API_URL = IS_PRODUCTION
   ? RENDER_PRODUCTION_URL
