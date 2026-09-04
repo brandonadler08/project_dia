@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "EAD BPO Gestores",
+    "slug": "crm-dna-cmp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "extra": {
+      "eas": {
+        "projectId": "f878451b-edeb-44b5-ba32-a686090e0a8d"
+      }
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.eadbpo.gestores",
+      "infoPlist": {
+        "NSCameraUsageDescription": "La aplicación necesita acceso a la cámara para tomar fotos de evidencia.",
+        "NSLocationWhenInUseUsageDescription": "La aplicación necesita acceso a la ubicación para registrar las visitas y calcular rutas.",
+        "NSMicrophoneUsageDescription": "La aplicación necesita acceso al micrófono para grabar videos de evidencia."
+      }
+    },
+    "android": {
+      "package": "com.eadbpo.gestores",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#10182E"
+      },
+      "permissions": [
+        "CAMERA",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "RECORD_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

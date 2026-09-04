@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+*/node_modules/
+package-lock.json
+
+# Production builds & bundles
+dist/
+build/
+*/dist/
+*/build/
+.expo/
+*/.expo/
+
+# Android build outputs & caches
+*.apk
+*.aab
+.gradle/
+*/.gradle/
+mobile-app/android/app/build/
+mobile-app/android/.gradle/
+mobile-app/android/build/
+mobile-app/android/app/src/main/assets/index.android.bundle
+
+# Environment variables & secrets
+.env
+.env.local
+.env.*.local
+*/.env
+
+# Database & Uploads
+*.sqlite
+*.sqlite3
+database.sqlite
+backend/database.sqlite
+uploads/
+backend/uploads/
+
+# Logs & temp
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
